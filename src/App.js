@@ -88,7 +88,6 @@ class App extends Component {
   }
   render() {
     const { gameboard, gameOver, winningPlayer } = this.state;
-    console.log(this.state);
     return (
       <div className="App">
         <div className="App-header">
