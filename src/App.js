@@ -105,7 +105,7 @@ class App extends Component {
   }
   renderGameboard (gameboard) {
     return (
-      <table>
+      <table className="table">
         <tbody>
           {gameboard.map((row, rindex) => {
             return (
