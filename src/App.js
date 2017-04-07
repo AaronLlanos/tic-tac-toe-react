@@ -34,6 +34,7 @@ class App extends Component {
       gameOver: false
     };
     this.onChange = this.onChange.bind(this);
+    this.resetBoard = this.resetBoard.bind(this);
   }
   /**
    * Should take a matrix and determine whether any more moves can or should be
@@ -94,13 +95,28 @@ class App extends Component {
       return newState
     })
   }
+  resetBoard () {
+    this.setState({
+      gameboard: [
+        [null, null, null],
+        [null, null, null],
+        [null, null, null]
+      ],
+      player: 1,
+      winningPlayer: 0,
+      gameOver: false
+    });
+  }
   renderGameOverMessage (winningPlayer) {
     let message = `Congratulations! Player ${winningPlayer} wins!`;
     if (winningPlayer === 0) {
       message = 'It\'s a draw.'
     }
     return (
-      <h1>{message}</h1>
+      <div>
+        <h1>{message}</h1>
+        <button onClick={this.resetBoard}>Play Again</button>
+      </div>
     )
   }
   renderGameboard (gameboard) {
