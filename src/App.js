@@ -35,6 +35,14 @@ class App extends Component {
     };
     this.onChange = this.onChange.bind(this);
   }
+  /**
+   * Should take a matrix and determine whether any more moves can or should be
+   * made.
+   * @param  {Array}    gameboard   matrix of either null or player numbers
+   * @return {Number}               -1 if a draw
+   * @return {Number}               0 if game is not over
+   * @return {Number}               1 if a player wins
+   */
   isGameOver(gameboard) {
     let allTilesPlayed = true;
     // Check the rows and columns
@@ -56,19 +64,19 @@ class App extends Component {
           allTilesPlayed = false;
         }
       }
-      if (allRowMatch || allColMatch) { return true; }
+      if (allRowMatch || allColMatch) { return 1; }
     }
-    if (allTilesPlayed) { return true; }
+    if (allTilesPlayed) { return -1; }
     // Check the diagonal
     const center = gameboard[1][1];
     if (center !== null) {
       if ((gameboard[0][0] === center && gameboard[2][2] === center)
           || (gameboard[2][0] === center && gameboard[0][2] === center)) {
-          return true;
+          return 1;
       }
     }
     // No matches
-    return false;
+    return 0;
   }
   onChange (position) {
     this.setState(prevState => {
@@ -76,15 +84,49 @@ class App extends Component {
       // Update the position in the gameboard.
       newState.gameboard[position.row][position.col] = prevState.player;
       // Check for player winning.
-      if (this.isGameOver(newState.gameboard)) {
-        // If a player won, end the game.
+      const gameStatus = this.isGameOver(newState.gameboard)
+      if (gameStatus !== 0) {
         newState.gameOver = true;
-        newState.winningPlayer = prevState.player;
+        if (gameStatus === 1) { newState.winningPlayer = prevState.player; }
       }
       // Update the player turn
       (prevState.player === 1) ? newState.player = 2 : newState.player = 1
       return newState
     })
+  }
+  renderGameOverMessage (winningPlayer) {
+    let message = `Congratulations! Player ${winningPlayer} wins!`;
+    if (winningPlayer === 0) {
+      message = 'It\'s a draw.'
+    }
+    return (
+      <h1>{message}</h1>
+    )
+  }
+  renderGameboard (gameboard) {
+    return (
+      <table>
+        <tbody>
+          {gameboard.map((row, rindex) => {
+            return (
+              <tr key={`row${rindex}`}>
+                {row.map((col, cindex) => {
+                  return (
+                    <td key={`tile${cindex}`}>
+                      <GameboardTile
+                        position={{row: rindex, col: cindex}}
+                        onChange={this.onChange}
+                        value={gameboard[rindex][cindex]}
+                      />
+                    </td>
+                  );
+                })}
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    )
   }
   render() {
     const { gameboard, gameOver, winningPlayer } = this.state;
@@ -94,25 +136,10 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h2>Welcome to React</h2>
         </div>
-        {gameOver && <h1>Player {winningPlayer} Wins!</h1>}
-        {!gameOver && <div className="App-intro">
-          {gameboard.map((row, rindex) => {
-            return (
-              <div key={`row${rindex}`}>
-                {row.map((col, cindex) => {
-                  return (
-                    <GameboardTile
-                      key={`tile${cindex}`}
-                      position={{row: rindex, col: cindex}}
-                      onChange={this.onChange}
-                      value={gameboard[rindex][cindex]}
-                    />
-                  );
-                })}
-              </div>
-            )
-          })}
-        </div>}
+        <div className="App-intro">
+          {gameOver && this.renderGameOverMessage(winningPlayer)}
+          {!gameOver && this.renderGameboard(gameboard)}
+        </div>
       </div>
     );
   }
